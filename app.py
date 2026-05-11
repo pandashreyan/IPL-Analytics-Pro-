@@ -9,7 +9,12 @@ from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ipl-secret-key-123'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ipl_predictor.db'
+
+# Environment-aware database path
+if os.environ.get('VERCEL'):
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/ipl_predictor.db'
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ipl_predictor.db'
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -43,8 +48,10 @@ class Prediction(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# Load ML Model
-model = pickle.load(open('ipl_win_predictor.pkl', 'rb'))
+# Load ML Model with absolute paths
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(BASE_DIR, 'ipl_win_predictor.pkl')
+model = pickle.load(open(model_path, 'rb'))
 
 teams = [
     'Sunrisers Hyderabad', 'Mumbai Indians', 'Royal Challengers Bangalore',
@@ -61,7 +68,8 @@ cities = [
     'Sharjah'
 ]
 
-matches_df = pd.read_csv('iplwin/matches.csv')
+matches_path = os.path.join(BASE_DIR, 'iplwin', 'matches.csv')
+matches_df = pd.read_csv(matches_path)
 
 def get_h2h_stats(team1, team2):
     h2h = matches_df[((matches_df['team1'] == team1) & (matches_df['team2'] == team2)) | 
