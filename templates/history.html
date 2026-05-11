@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction History | Elite Analytics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
+        }
+
+        body {
+            background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            padding: 3rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-back {
+            color: white;
+            text-decoration: none;
+            padding: 0.8rem 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .history-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .history-item {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            padding: 1.5rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .match-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .vs {
+            font-weight: 800;
+            color: #6366f1;
+        }
+
+        .prob-badge {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 1.2rem;
+        }
+
+        .date {
+            color: #94a3b8;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Your Analytics History</h1>
+            <a href="/" class="btn-back">Back to Simulator</a>
+        </header>
+
+        {% if predictions %}
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5fr; margin-bottom: 3rem;">
+                <div class="stat-card" style="background: rgba(99, 102, 241, 0.1); padding: 1.5rem; border-radius: 20px; border: 1px solid rgba(99, 102, 241, 0.2); text-align: center;">
+                    <div style="font-size: 0.8rem; color: #94a3b8; text-transform: uppercase;">Total Forecasts</div>
+                    <div style="font-size: 2rem; font-weight: 800;">{{ predictions|length }}</div>
+                </div>
+                <div class="stat-card" style="background: rgba(34, 211, 238, 0.1); padding: 1.5rem; border-radius: 20px; border: 1px solid rgba(34, 211, 238, 0.2); text-align: center;">
+                    <div style="font-size: 0.8rem; color: #94a3b8; text-transform: uppercase;">Correct</div>
+                    <div style="font-size: 2rem; font-weight: 800;">{{ predictions|selectattr('status', 'equalto', 'Accurate')|list|length }}</div>
+                </div>
+                <div class="stat-card" style="background: rgba(168, 85, 247, 0.1); padding: 1.5rem; border-radius: 20px; border: 1px solid rgba(168, 85, 247, 0.2); text-align: center;">
+                    <div style="font-size: 0.8rem; color: #94a3b8; text-transform: uppercase;">Accuracy Rate</div>
+                    <div style="font-size: 2rem; font-weight: 800;">
+                        {% set total = predictions|selectattr('status', 'ne', 'Pending')|list|length %}
+                        {% if total > 0 %}
+                            {{ (predictions|selectattr('status', 'equalto', 'Accurate')|list|length / total * 100)|round(1) }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="history-list">
+            {% for pred in predictions %}
+                <div class="history-item">
+                    <div>
+                        <div class="match-info">
+                            <span>{{ pred.batting_team }}</span>
+                            <span class="vs">VS</span>
+                            <span>{{ pred.bowling_team }}</span>
+                        </div>
+                        <div class="date">{{ pred.date_posted.strftime('%d %b %Y, %H:%M') }}</div>
+                    </div>
+                    <div style="flex: 1; max-width: 150px; height: 50px; margin: 0 2rem;">
+                        <canvas id="sparkline-{{ pred.id }}"></canvas>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="prob-badge">{{ pred.win_prob }}% Win</div>
+                        <div style="margin-top: 0.5rem;">
+                            {% if pred.status == 'Pending' %}
+                                <a href="/update_status/{{ pred.id }}/Accurate" style="color: #22c55e; text-decoration: none; font-size: 0.8rem; margin-right: 0.5rem; border: 1px solid #22c55e; padding: 2px 6px; border-radius: 4px;">✓ Accurate</a>
+                                <a href="/update_status/{{ pred.id }}/Inaccurate" style="color: #ef4444; text-decoration: none; font-size: 0.8rem; border: 1px solid #ef4444; padding: 2px 6px; border-radius: 4px;">✗ Wrong</a>
+                            {% elif pred.status == 'Accurate' %}
+                                <span style="color: #22c55e; font-size: 0.8rem; font-weight: 700;">CORRECT ✓</span>
+                            {% else %}
+                                <span style="color: #ef4444; font-size: 0.8rem; font-weight: 700;">INCORRECT ✗</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div style="text-align: center; opacity: 0.5; padding: 3rem;">No history found. Start simulating to track results!</div>
+            {% endfor %}
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const historyData = JSON.parse(document.getElementById('history-data').textContent);
+            
+            for (const predId in historyData) {
+                const progression = historyData[predId];
+                if (progression) {
+                    const canvas = document.getElementById('sparkline-' + predId);
+                    if (!canvas) continue;
+                    
+                    const ctx = canvas.getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: [1,2,3,4,5,6],
+                            datasets: [{
+                                data: progression,
+                                borderColor: '#6366f1',
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                fill: false,
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                x: { display: false },
+                                y: { display: false, min: 0, max: 100 }
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+
+    <!-- Data for JS -->
+    <script id="history-data" type="application/json">
+    {
+        {% for pred in predictions %}
+            "{{ pred.id }}": {{ (pred.progression_json | safe) if pred.progression_json else 'null' }}{{ ',' if not loop.last else '' }}
+        {% endfor %}
+    }
+    </script>
+</body>
+</html>

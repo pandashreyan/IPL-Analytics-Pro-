@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPL Win Predictor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        select, input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .result {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>IPL Win Predictor</h1>
+        <form action="/predict" method="post">
+            <label for="batting_team">Select Batting Team:</label>
+            <select name="batting_team" required>
+                {% for team in teams %}
+                    <option value="{{ team }}">{{ team }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="bowling_team">Select Bowling Team:</label>
+            <select name="bowling_team" required>
+                {% for team in teams %}
+                    <option value="{{ team }}">{{ team }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="city">Select Host City:</label>
+            <select name="city" required>
+                {% for city in cities %}
+                    <option value="{{ city }}">{{ city }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="target">Target Score:</label>
+            <input type="number" name="target" required>
+
+            <label for="score">Current Score:</label>
+            <input type="number" name="score" required>
+
+            <label for="overs">Overs Completed:</label>
+            <input type="number" step="0.1" name="overs" required>
+
+            <label for="wickets">Wickets Lost:</label>
+            <input type="number" name="wickets" required>
+
+            <button type="submit">Predict Probability</button>
+        </form>
+
+        {% if win_probability is not none %}
+            <div class="result">
+                <p>{{ batting_team }} Win Probability: {{ win_probability }}%</p>
+                <p>{{ bowling_team }} Win Probability: {{ loss_probability }}%</p>
+            </div>
+        {% endif %}
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPL Win Predictor | Elite Analytics Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --accent: #22d3ee;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sidebar, .main-content {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .value-display {
+            color: var(--accent);
+            font-weight: 800;
+        }
+
+        select, input[type="number"] {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 0.8rem;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            outline: none;
+            margin: 10px 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.4);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-title {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .probability-hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+            border-radius: 24px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .prob-box {
+            text-align: center;
+        }
+
+        .prob-num {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(to bottom, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .prob-team {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-top: 0.5rem;
+        }
+
+        .chart-container {
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        .ai-summary-box {
+            background: linear-gradient(135deg, rgba(34, 211, 238, 0.1), rgba(99, 102, 241, 0.1));
+            border: 1px solid rgba(34, 211, 238, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-summary-box::before {
+            content: 'AI INSIGHT';
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--accent);
+            color: var(--bg);
+            font-size: 0.6rem;
+            font-weight: 900;
+            padding: 2px 8px;
+            border-bottom-left-radius: 8px;
+        }
+
+        .share-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .share-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 1024px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav style="display: flex; justify-content: flex-end; gap: 1.5rem; margin-bottom: 2rem; padding: 0 1rem;">
+        {% if current_user.is_authenticated %}
+            <span style="color: var(--text-dim)">Welcome, <b>{{ current_user.username }}</b></span>
+            <a href="/history" style="color: var(--accent); text-decoration: none; font-weight: 600;">History</a>
+            <a href="/logout" style="color: #ef4444; text-decoration: none; font-weight: 600;">Logout</a>
+        {% else %}
+            <a href="/login" style="color: var(--accent); text-decoration: none; font-weight: 600;">Login</a>
+            <a href="/register" style="color: var(--primary); text-decoration: none; font-weight: 600;">Register</a>
+        {% endif %}
+    </nav>
+
+    <div class="layout">
+        <!-- Sidebar: Input & Simulator -->
+        <div class="sidebar">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h1>IPL Predictor</h1>
+                <button onclick="mockLiveScore()" style="font-size: 0.7rem; padding: 0.4rem 0.8rem; margin: 0; background: #ef4444;">LIVE</button>
+            </div>
+            <p class="subtitle">Match Simulator Pro</p>
+            
+            <form action="/predict" method="post">
+                <div class="input-group">
+                    <label>Batting Team</label>
+                    <select name="batting_team" required>
+                        {% for team in teams %}
+                            <option value="{{ team }}" {% if batting_team == team %}selected{% endif %}>{{ team }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Bowling Team</label>
+                    <select name="bowling_team" required>
+                        {% for team in teams %}
+                            <option value="{{ team }}" {% if bowling_team == team %}selected{% endif %}>{{ team }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Host City</label>
+                    <select name="city" required>
+                        {% for city in cities %}
+                            <option value="{{ city }}" {% if city == request.form.get('city') %}selected{% endif %}>{{ city }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Target Score <span class="value-display" id="target_val">{{ request.form.get('target', 180) }}</span></label>
+                    <input type="range" name="target" min="50" max="300" value="{{ request.form.get('target', 180) }}" oninput="updateVal('target', this.value)">
+                </div>
+
+                <div class="input-group">
+                    <label>Current Score <span class="value-display" id="score_val">{{ request.form.get('score', 100) }}</span></label>
+                    <input type="range" name="score" min="0" max="300" value="{{ request.form.get('score', 100) }}" oninput="updateVal('score', this.value)">
+                </div>
+
+                <div class="input-group">
+                    <label>Overs Completed <span class="value-display" id="overs_val">{{ request.form.get('overs', 10) }}</span></label>
+                    <input type="range" name="overs" min="0.1" max="19.5" step="0.1" value="{{ request.form.get('overs', 10) }}" oninput="updateVal('overs', this.value)">
+                </div>
+
+                <div class="input-group">
+                    <label>Wickets Lost <span class="value-display" id="wickets_val">{{ request.form.get('wickets', 3) }}</span></label>
+                    <input type="range" name="wickets" min="0" max="9" value="{{ request.form.get('wickets', 3) }}" oninput="updateVal('wickets', this.value)">
+                </div>
+
+                <button type="submit">Run Prediction Simulation</button>
+            </form>
+        </div>
+
+        <!-- Main Content: Results & Analytics -->
+        <div class="main-content">
+            {% if win_probability is not none %}
+                <div class="ai-summary-box">
+                    <p style="font-size: 1.1rem; line-height: 1.6; font-weight: 500;">{{ ai_summary }}</p>
+                    <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+                        <button class="share-btn" onclick="sharePrediction()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                            Share Analysis
+                        </button>
+                    </div>
+                </div>
+
+                <div class="probability-hero" id="capture-area">
+                    <div class="prob-box">
+                        <div class="prob-num">{{ win_probability }}%</div>
+                        <div class="prob-team">{{ batting_team }}</div>
+                    </div>
+                    <div style="font-size: 1.5rem; opacity: 0.3;">VS</div>
+                    <div class="prob-box">
+                        <div class="prob-num">{{ loss_probability }}%</div>
+                        <div class="prob-team">{{ bowling_team }}</div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-title">Head-to-Head</div>
+                        <div class="stat-value">{{ h2h.team1_wins }} - {{ h2h.team2_wins }}</div>
+                        <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.5rem;">Wins in {{ h2h.total }} encounters</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Venue Insight</div>
+                        <div class="stat-value">{{ venue.toss_win_match_win }}%</div>
+                        <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.5rem;">Toss winners win match here</p>
+                    </div>
+                </div>
+
+                <div class="stat-card" style="margin-bottom: 2rem;">
+                    <div class="stat-title">Key Players to Watch</div>
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <div style="flex: 1; padding: 1rem; background: rgba(99, 102, 241, 0.1); border-radius: 12px; text-align: center;">
+                            <div style="font-weight: 800; color: var(--accent);">Impact Batsman</div>
+                            <div style="font-size: 0.9rem;">{{ batting_team }} Star</div>
+                        </div>
+                        <div style="flex: 1; padding: 1rem; background: rgba(168, 85, 247, 0.1); border-radius: 12px; text-align: center;">
+                            <div style="font-weight: 800; color: var(--primary);">Strike Bowler</div>
+                            <div style="font-size: 0.9rem;">{{ bowling_team }} Ace</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-top: 2rem;">
+                    <div class="stat-card">
+                        <div class="stat-title">Probability Trend</div>
+                        <div class="chart-container">
+                            <canvas id="probChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Venue DNA</div>
+                        <div class="chart-container">
+                            <canvas id="radarChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Team Comparison</div>
+                        <div class="chart-container">
+                            <canvas id="teamRadarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card" style="margin-top: 2rem;">
+                    <div class="stat-title">Elite Bookmaker Odds (Simulated)</div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
+                        <div style="flex: 1; text-align: center; border-right: 1px solid rgba(255,255,255,0.1);">
+                            <div style="font-size: 0.8rem; color: var(--text-dim);">{{ batting_team }}</div>
+                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--accent);">{{ (100 / win_probability)|round(2) if win_probability > 0 else 'N/A' }}</div>
+                        </div>
+                        <div style="flex: 1; text-align: center; border-right: 1px solid rgba(255,255,255,0.1);">
+                            <div style="font-size: 0.8rem; color: var(--text-dim);">DRAW (DLS)</div>
+                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-dim);">12.50</div>
+                        </div>
+                        <div style="flex: 1; text-align: center;">
+                            <div style="font-size: 0.8rem; color: var(--text-dim);">{{ bowling_team }}</div>
+                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">{{ (100 / loss_probability)|round(2) if loss_probability > 0 else 'N/A' }}</div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0.5; text-align: center;">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <h2 style="margin-top: 1rem;">Ready for Analysis</h2>
+                    <p>Adjust the simulation parameters and run prediction.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function updateVal(id, val) {
+            document.getElementById(id + '_val').innerText = val;
+        }
+
+        function mockLiveScore() {
+            // Set some realistic live match data
+            document.querySelector('select[name="batting_team"]').value = 'Royal Challengers Bangalore';
+            document.querySelector('select[name="bowling_team"]').value = 'Mumbai Indians';
+            document.querySelector('select[name="city"]').value = 'Mumbai';
+            
+            // Randomize score state
+            const target = 195;
+            const overs = (Math.random() * 5 + 12).toFixed(1); // 12.0 to 17.0
+            const score = Math.floor(target * (overs / 20) * 0.9);
+            const wickets = Math.floor(Math.random() * 5 + 2);
+
+            document.querySelector('input[name="target"]').value = target;
+            document.querySelector('input[name="score"]').value = score;
+            document.querySelector('input[name="overs"]').value = overs;
+            document.querySelector('input[name="wickets"]').value = wickets;
+
+            // Update display labels
+            updateVal('target', target);
+            updateVal('score', score);
+            updateVal('overs', overs);
+            updateVal('wickets', wickets);
+
+            alert("LIVE DATA SYNCED: RCB vs MI @ Wankhede\nState: " + score + "/" + wickets + " after " + overs + " overs.");
+            
+            // Auto submit for immediate analysis
+            document.querySelector('form').submit();
+        }
+
+        function sharePrediction() {
+            html2canvas(document.querySelector("#capture-area")).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'ipl-prediction.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+
+        const progressionData = JSON.parse(document.getElementById('progression-data').textContent);
+        const battingTeam = JSON.parse(document.getElementById('batting-team-data').textContent);
+        const bowlingTeam = JSON.parse(document.getElementById('bowling-team-data').textContent);
+        const radarData = JSON.parse(document.getElementById('radar-data').textContent);
+        const teamStats = JSON.parse(document.getElementById('team-stats-data').textContent);
+
+        if (progressionData && progressionData.length > 0) {
+            // Line Chart
+            const ctxLine = document.getElementById('probChart').getContext('2d');
+            new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: ['-5 Ov', '-4 Ov', '-3 Ov', '-2 Ov', '-1 Ov', 'Current'],
+                    datasets: [{
+                        label: battingTeam + ' Win %',
+                        data: progressionData,
+                        borderColor: '#6366f1',
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, max: 100, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Venue Radar Chart
+            const ctxRadar = document.getElementById('radarChart').getContext('2d');
+            new Chart(ctxRadar, {
+                type: 'radar',
+                data: {
+                    labels: ['Pace', 'Spin', 'Batting', 'Death', 'Boundaries'],
+                    datasets: [{
+                        label: 'Venue DNA',
+                        data: radarData,
+                        backgroundColor: 'rgba(34, 211, 238, 0.2)',
+                        borderColor: '#22d3ee',
+                        pointBackgroundColor: '#22d3ee',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            pointLabels: { color: '#94a3b8' },
+                            ticks: { display: false },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    }
+                }
+            });
+
+            // Team Comparison Radar Chart
+            const ctxTeamRadar = document.getElementById('teamRadarChart').getContext('2d');
+            new Chart(ctxTeamRadar, {
+                type: 'radar',
+                data: {
+                    labels: ['Batting', 'Bowling', 'Fielding', 'Death', 'Powerplay'],
+                    datasets: [
+                        {
+                            label: battingTeam,
+                            data: teamStats[battingTeam],
+                            backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                            borderColor: '#6366f1',
+                            borderWidth: 2
+                        },
+                        {
+                            label: bowlingTeam,
+                            data: teamStats[bowlingTeam],
+                            backgroundColor: 'rgba(168, 85, 247, 0.2)',
+                            borderColor: '#a855f7',
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            pointLabels: { color: '#94a3b8' },
+                            ticks: { display: false },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+
+    <!-- Data for JS -->
+    <script id="progression-data" type="application/json">{{ progression | tojson | safe if progression else '[]' }}</script>
+    <script id="batting-team-data" type="application/json">{{ batting_team | tojson | safe if batting_team else '""' }}</script>
+    <script id="bowling-team-data" type="application/json">{{ bowling_team | tojson | safe if bowling_team else '""' }}</script>
+    <script id="radar-data" type="application/json">{{ (venue.radar | tojson | safe) if venue else 'null' }}</script>
+    <script id="team-stats-data" type="application/json">{{ (team_stats | tojson | safe) if team_stats else 'null' }}</script>
+</body>
+</html>
