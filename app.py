@@ -235,27 +235,27 @@ def update_status(pred_id, status):
     db.session.commit()
     return redirect(url_for('history'))
 
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        # Simple auto-migration for status and progression_json columns
-        try:
-            from sqlalchemy import text
-            with db.engine.connect() as conn:
-                # Check for status column
-                try:
-                    conn.execute(text("ALTER TABLE prediction ADD COLUMN status VARCHAR(20) DEFAULT 'Pending'"))
-                    conn.commit()
-                except Exception:
-                    pass # Column might already exist
-                
-                # Check for progression_json column
-                try:
-                    conn.execute(text("ALTER TABLE prediction ADD COLUMN progression_json TEXT"))
-                    conn.commit()
-                except Exception:
-                    pass # Column might already exist
-        except Exception as e:
-            print(f"Migration notice: {e}")
+# Initialize database and run migrations
+with app.app_context():
+    db.create_all()
+    try:
+        from sqlalchemy import text
+        with db.engine.connect() as conn:
+            # Check for status column
+            try:
+                conn.execute(text("ALTER TABLE prediction ADD COLUMN status VARCHAR(20) DEFAULT 'Pending'"))
+                conn.commit()
+            except Exception:
+                pass 
             
+            # Check for progression_json column
+            try:
+                conn.execute(text("ALTER TABLE prediction ADD COLUMN progression_json TEXT"))
+                conn.commit()
+            except Exception:
+                pass
+    except Exception as e:
+        print(f"Migration notice: {e}")
+
+if __name__ == '__main__':
     app.run(debug=True)
